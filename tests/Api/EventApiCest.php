@@ -85,7 +85,7 @@ class EventApiCest
         $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendPOST('/event', [
             'type' => 'goal',
-            'scorer' => 'Bukayo Saka',
+            'player' => 'Bukayo Saka',
             'assistant' => 'Martin Ødegaard',
             'team_id' => 'arsenal',
             'match_id' => 'm1',
@@ -116,7 +116,7 @@ class EventApiCest
         $I->seeResponseIsJson();
     
         $I->seeResponseContainsJson([
-            'error' => 'scorer is required for goal events'
+            'error' => 'player is required for goal events'
         ]);
     }
 
