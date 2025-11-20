@@ -11,57 +11,91 @@ header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-if ($method === 'POST' && $path === '/event') {
+$eventsPath = __DIR__ . '/../storage/events.txt';
+$statsPath = __DIR__ . '/../storage/statistics.txt';
+
+$body = null;
+$status = 200;
+
+if ($method === 'POST' && $path === '/event') {    
+    [$body, $status] = handleEventRequest($eventsPath);
+} elseif ($method === 'GET' && $path === '/statistics') {
+    [$body, $status] = handleStatisticsRequest($statsPath);
+} else {
+    $body = ['error' => 'Not found'];
+    $status = 404;
+}
+
+http_response_code($status);
+echo json_encode($body);
+exit;
+
+
+
+
+function handleStatisticsRequest(string $statsPath): array
+{    
+    $matchId = $_GET['match_id'] ?? null;
+    $teamId = $_GET['team_id'] ?? null;
+
+    if (!$matchId) {
+        return [
+            ['error' => 'match_id is required'],
+            400,
+        ];
+    }
+
+    $statsManager = new StatisticsManager($statsPath);
+
+    try {
+        if ($teamId) { // Get team statistics for specific match 
+            $stats = $statsManager->getTeamStatistics($matchId, $teamId);
+            return [[
+                'match_id' => $matchId,
+                'team_id' => $teamId,
+                'statistics' => $stats
+            ], 200];
+        }   
+        // Get all team statistics for specific match    
+        $stats = $statsManager->getMatchStatistics($matchId);
+        return [[
+                'match_id' => $matchId,
+                'statistics' => $stats
+            ], 200];
+         
+    } catch (Exception $e) {
+        return [
+            ['error' => $e->getMessage()],
+            500
+        ];
+    }
+} 
+
+function handleEventRequest(string $eventsPath): array
+{
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     
     if (json_last_error() !== JSON_ERROR_NONE) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid JSON']);
+        return [
+            ['error' => 'Invalid JSON'],
+            400
+        ];
         exit;
     }
     
-    $handler = new EventHandler(__DIR__ . '/../storage/events.txt');
+    $handler = new EventHandler($eventsPath);
     
     try {
         $result = $handler->handleEvent($data);
-        http_response_code(201);
-        echo json_encode($result);
+        return [
+            $result, 
+            201
+        ];
     } catch (Exception $e) {
-        http_response_code(400);
-        echo json_encode(['error' => $e->getMessage()]);
+        return [
+            ['error' => $e->getMessage()], 
+            400
+        ];
     }
-} elseif ($method === 'GET' && $path === '/statistics') {
-    $statsManager = new StatisticsManager(__DIR__ . '/../storage/statistics.txt');
-    
-    $matchId = $_GET['match_id'] ?? null;
-    $teamId = $_GET['team_id'] ?? null;
-    
-    try {
-        if ($matchId && $teamId) {
-            // Get team statistics for specific match
-            $stats = $statsManager->getTeamStatistics($matchId, $teamId);
-            echo json_encode([
-                'match_id' => $matchId,
-                'team_id' => $teamId,
-                'statistics' => $stats
-            ]);
-        } elseif ($matchId) {
-            // Get all team statistics for specific match
-            $stats = $statsManager->getMatchStatistics($matchId);
-            echo json_encode([
-                'match_id' => $matchId,
-                'statistics' => $stats
-            ]);
-        } else {
-            http_response_code(400);
-            echo json_encode(['error' => 'match_id is required']);
-        }
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
-    }
-} else {
-    http_response_code(404);
-    echo json_encode(['error' => 'Not found']);
 }
