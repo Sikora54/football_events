@@ -1,0 +1,9 @@
+/vendor/
+/tests/_output/
+/storage/*.txt
+
+.phpunit.result.cache
+
+
+
+
