@@ -7,13 +7,13 @@ Simple application for handling football events - recruitment task.
 The following business requirements must be met by the solution:
 
 ### Core business requirements
-- [ ] System accurately logs and updates statistics upon receiving a **goal** event, including details such as scorer, assisting player, team, minute, and match ID.
-- [ ] System accurately logs and updates records upon receiving a **foul** event, including details such as player at fault, affected player, team, match ID, and precise time of the foul.
-- [ ] All event data is permanently stored and retrievable
-- [ ] Relevant statistics are calculated and maintained for both event types
+- [x] System accurately logs and updates statistics upon receiving a **goal** event, including details such as scorer, assisting player, team, minute, and match ID.
+- [x] System accurately logs and updates records upon receiving a **foul** event, including details such as player at fault, affected player, team, match ID, and precise time of the foul.
+- [x] All event data is permanently stored and retrievable
+- [x] Relevant statistics are calculated and maintained for both event types
 - [ ] Clients receive information about all events in real-time
 - [ ] Data integrity is maintained at all times
-- [ ] Historical data is preserved and accessible
+- [x] Historical data is preserved and accessible
 - [ ] System can handle high volume of events
 
 ### Client communication requirements
@@ -23,11 +23,11 @@ The following business requirements must be met by the solution:
 
 ### Recruitment requirements
 - [ ] The solution should be provided as a GitHub repository at new branch with at least three meaningful commits
-- [ ] Some kind of abstraction is allowed to demonstrate the solution over a fully functioning application
+- [x] Some kind of abstraction is allowed to demonstrate the solution over a fully functioning application
 - [ ] Try to devote no more than 3 hours to solving the problem - anything you don't have time to do can be written as a plan for further action
-- [ ] Try not to use AI tools. If you do - write down how you use it
-- [ ] The solution presented is your colleague's PoC and is not a final contract for storing and exchanging data. If you believe the current implementation might be different, please include this in your changes
-- [ ] You have full responsibility and influence over the final solution; the PoC is just a teaser – show off your skills
+- [x] Try not to use AI tools. If you do - write down how you use it
+- [x] The solution presented is your colleague's PoC and is not a final contract for storing and exchanging data. If you believe the current implementation might be different, please include this in your changes
+- [x] You have full responsibility and influence over the final solution; the PoC is just a teaser – show off your skills
 
 ## Requirements
 
@@ -49,6 +49,22 @@ docker exec -it football_events_app composer install
 3. The application will be available at: `http://localhost:8000`
 
 ## Usage
+
+### Goal Event
+
+Send a POST request with a Goal event:
+```bash
+curl -X POST http://localhost:8000/event \
+  -H "Content-Type: application/json" \
+  -d '{ 
+        "type": "goal",
+        "scorer": "Bukayo Saka",
+        "assistant": "Martin Ødegaard",
+        "team_id": "arsenal",
+        "match_id": "m1",
+        "minute": 12
+      }'
+```
 
 ### Foul Event
 

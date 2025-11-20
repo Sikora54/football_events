@@ -79,4 +79,45 @@ class EventApiCest
             'error' => 'Event type is required'
         ]);
     }
+
+    public function testGoalEvent(ApiTester $I)
+    {
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPOST('/event', [
+            'type' => 'goal',
+            'scorer' => 'Bukayo Saka',
+            'assistant' => 'Martin Ødegaard',
+            'team_id' => 'arsenal',
+            'match_id' => 'm1',
+            'minute' => 12,
+        ]);
+
+        $I->seeResponseCodeIs(201);
+        $I->seeResponseIsJson();
+
+        $I->seeResponseContainsJson([
+            'status' => 'success',
+            'message' => 'Event saved successfully',
+            'event' => [
+                'type' => 'goal',
+            ],
+        ]);
+    }
+
+    public function testGoalEventWithoutRequiredFields(ApiTester $I)
+    {
+        $I->haveHttpHeader('Content-Type', 'application/json');
+
+        $I->sendPOST('/event', [
+            'type' => 'goal',
+        ]);
+
+        $I->seeResponseCodeIs(400);
+        $I->seeResponseIsJson();
+    
+        $I->seeResponseContainsJson([
+            'error' => 'scorer is required for goal events'
+        ]);
+    }
+
 }
