@@ -12,21 +12,23 @@ class GoalEventStrategy implements EventStrategyInterface
 
     public function validate(array $data): void
     {
-        $required = ['scorer', 'team_id', 'match_id', 'minute'];
-        
-        foreach ($required as $field) {
-            if (!isset($data[$field]) || $data[$field] === '') {
-                throw new \InvalidArgumentException(sprintf('%s is required for goal events', $field));
-            }
+        if (!isset($data['player']) || $data['player'] === '') {
+            throw new \InvalidArgumentException('player is required for goal events');
         }
 
-        if (!is_int($data['minute']) || $data['minute'] < 0) {
-            throw new \InvalidArgumentException('minute must be a non-negative integer for goal events');
+        if (isset($data['minute'])) {
+            if (!is_int($data['minute']) || $data['minute'] < 0) {
+                throw new \InvalidArgumentException('minute must be a non-negative integer for goal events');
+            }
         }
     }
 
     public function updateStats(array $data): void
     {
+        if (empty($data['match_id']) || empty($data['team_id'])) {
+            return;
+        }
+
         $matchId = $data['match_id'];
         $teamId  = $data['team_id'];
 
